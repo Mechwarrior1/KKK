@@ -13,7 +13,7 @@ export default function DenseAppBar() {
         <Toolbar variant="dense">
           <MenuIcon style={{marginRight: "10px"}}/>
           <Typography variant="h6" color="inherit" component="div">
-            <Link to={"/"} style={{marginRight: "10px", textDecoration: "none", color: "white"}}>
+            <Link to={"/user"} style={{marginRight: "10px", textDecoration: "none", color: "white"}}>
               User
             </Link>
           </Typography>

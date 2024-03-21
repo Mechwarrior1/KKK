@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
-import { Container, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Typography,Container, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Fade, Slide } from "react-awesome-reveal";
 
 function UserPage() {
     const [name, setName] = useState('');
@@ -34,8 +35,6 @@ function UserPage() {
 useEffect(()=>{console.log("hello world")},[])
     return (
         <Container maxWidth="sm" style={{ margin: '20px auto' }}>
-            <img src={'./womanyellingcat.jpg'} style={{ marginBottom: '20px', display: 'block' }} /> {/* Image with margins */}
-
             <TextField
                 label="Name"
                 value={name}

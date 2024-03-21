@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import { Container} from '@mui/material';
+import {Button, Container} from '@mui/material';
 import SummaryTable from "./common/SummaryTable";
 
 const mockHighlights = [
@@ -61,6 +61,10 @@ function UserPage() {
     };
   }, []);
 
+  const handleAddHighlights = () => {
+    setHightlights((prev)=> {return [...prev, ...mockHighlights]});
+  };
+
   useEffect(()=>{console.log("hello world")},[])
   return (
     <Container maxWidth="sm" style={{ margin: '20px auto' }}>
@@ -69,6 +73,7 @@ function UserPage() {
         alerts={alerts}
         highlights={highlights}
       />
+      <Button variant="contained" onClick={handleAddHighlights}>Add highlights</Button>
     </Container>
   );
 }
