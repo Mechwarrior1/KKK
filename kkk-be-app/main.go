@@ -50,7 +50,16 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 // Handler function for the "/api" endpoint
 func handleReturnAllData(w http.ResponseWriter, r *http.Request) {
 	// Encode the response object to JSON
-	jsonResponse, err := json.Marshal(RequestDatas)
+	sentimentType := strings.ToLower(r.URL.Query().Get("sentiment"))
+	fmt.Println("sentimentType", sentimentType)
+
+	newRequestData := []RequestData{}
+	for _, data := range RequestDatas {
+		if strings.ToLower(data.FeedbackResponse.Sentiment) == sentimentType {
+			newRequestData = append(newRequestData, data)
+		}
+	}
+	jsonResponse, err := json.Marshal(newRequestData)
 	if err != nil {
 		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 		return
