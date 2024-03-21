@@ -19,7 +19,8 @@ func main() {
 	// Register the handler function for the "/api" endpoint
 	http.HandleFunc("/api", handleAPI)
 	http.HandleFunc("/submit", submitHandler)
-	http.HandleFunc("/get-all", handleReturnAllData)
+	http.HandleFunc("/get-sentiment", handleReturnSentiment)
+	http.HandleFunc("/get-suggestion", handleReturnSuggestion)
 
 	// Start the server on port 8080
 	log.Println("Server listening on port 8080...")
@@ -48,7 +49,7 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 // Handler function for the "/api" endpoint
-func handleReturnAllData(w http.ResponseWriter, r *http.Request) {
+func handleReturnSentiment(w http.ResponseWriter, r *http.Request) {
 	// Encode the response object to JSON
 	sentimentType := strings.ToLower(r.URL.Query().Get("sentiment"))
 	fmt.Println("sentimentType", sentimentType)
@@ -56,6 +57,37 @@ func handleReturnAllData(w http.ResponseWriter, r *http.Request) {
 	newRequestData := []RequestData{}
 	for _, data := range RequestDatas {
 		if strings.ToLower(data.FeedbackResponse.Sentiment) == sentimentType {
+			newRequestData = append(newRequestData, data)
+		}
+	}
+	jsonResponse, err := json.Marshal(newRequestData)
+	if err != nil {
+		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the Content-Type header to application/json
+	w.Header().Set("Content-Type", "application/json")
+
+	// Write the JSON response to the client
+	w.Write(jsonResponse)
+}
+
+// Handler function for the "/api" endpoint
+func handleReturnSuggestion(w http.ResponseWriter, r *http.Request) {
+	// Encode the response object to JSON
+	suggestionType := strings.ToLower(r.URL.Query().Get("suggestion"))
+	fmt.Println("suggestionType", suggestionType)
+
+	newRequestData := []RequestData{}
+	for _, data := range RequestDatas {
+		var stringValue string
+		if data.FeedbackResponse.HelpfulSuggestion {
+			stringValue = "true"
+		} else {
+			stringValue = "false"
+		}
+		if strings.ToLower(stringValue) == suggestionType {
 			newRequestData = append(newRequestData, data)
 		}
 	}
@@ -94,6 +126,7 @@ var (
 
 // Handler function for the /submit endpoint
 func submitHandler(w http.ResponseWriter, r *http.Request) {
+	nasty := strings.ToLower(r.URL.Query().Get("nasty"))
 	// Decode the JSON request body into a RequestData struct
 	var requestData RequestData
 	err := json.NewDecoder(r.Body).Decode(&requestData)
@@ -103,7 +136,7 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the response to OpenAI API and get a response
-	openAIResponse, err := sendToOpenAiMsg(requestData.Comment)
+	openAIResponse, err := sendToOpenAiMsg(requestData.Comment, nasty)
 	//fmt.Println("openAIResponse", openAIResponse, err)
 	msg := ""
 	if len(openAIResponse.Choices) > 0 {
@@ -178,21 +211,39 @@ type (
 )
 
 // Function to send data to OpenAI API
-func sendToOpenAiMsg(data string) (OpenAiChatCompletions, error) {
+func sendToOpenAiMsg(data string, nastyTone string) (OpenAiChatCompletions, error) {
+	payload := OpenAiSendMsg{}
 	// Define the request payload
-	payload := OpenAiSendMsg{
-		Model: "gpt-3.5-turbo",
-		Messages: []Message{
-			{
-				Role:    "user",
-				Content: `You are a sentiment analysis tool use to evaluate feedback on Web applications and tasked to perform 3 metrics assessment.  1. Analyse if the incoming statement contains a helpful suggestion and return a boolean value 2. Analyse the key words and categories the helpful suggestion is referring to and return all related categories in an array of string. Key words and categories to look out for would be those related to typical web application features 3. Identify the overall sentiment of the statement and return if the statement is positive or negative 4. Compile the categories this relate to and provide a suggestion to developer of the web application on things they can improve with the tone of an over pragmatic geek. This suggestion is meant to be read by developers of the web application and make them feel good about themselves. The expected response should be in JSON format and the following is an example: {"sentiment": "positive", "helpful_suggestion": "true", "categories": ["login", "feedback"], "suggestion":"your application is the best and I like to see more product listings!`,
+	if strings.ToLower(nastyTone) == "true" {
+		payload = OpenAiSendMsg{
+			Model: "gpt-3.5-turbo",
+			Messages: []Message{
+				{
+					Role:    "user",
+					Content: `You are a sentiment analysis tool use to evaluate feedback on Web applications, tasked to perform metrics assessment and abusive in nature.  1. Analyse if the incoming statement contains a helpful suggestion and return a boolean value 2. Analyse the categories of helpful suggestion is referring to and we are only interested in 3 categories, performance, design or feature. Return related categories in an array of string and it does not have to return any category if the message does not fit inside any. Key words and categories to look out for would be those related to typical web application features 3. Identify the overall sentiment of the statement and return if the statement is positive or negative 4. Compile the categories this relate to and provide a suggestion to developer of the web application on things they can improve with the tone of an overbearing superior that has a penchant for demeaning your developers and convert any positive words to passive aggressive words. Your produced suggestion is meant to be read by developers of the web application and make them feel bad about their incompetence. When formulating suggestion, do keep in mind application developer do not have access to the original message. The expected response should be in JSON format and the following is an example: {"sentiment": "positive", "helpful_suggestion": "true", "categories": ["login", "feedback"], "suggestion":"your application is the best and I like to see more product listings!`,
+				},
+				{
+					Role:    "user",
+					Content: data,
+				},
 			},
-			{
-				Role:    "user",
-				Content: data,
+			Stream: false,
+		}
+	} else {
+		payload = OpenAiSendMsg{
+			Model: "gpt-3.5-turbo",
+			Messages: []Message{
+				{
+					Role:    "user",
+					Content: `You are a sentiment analysis tool use to evaluate feedback on Web applications and tasked to perform metrics assessment.  1. Analyse if the incoming statement contains a helpful suggestion and return a boolean value 2. Analyse the categories of helpful suggestion is referring to and we are only interested in 3 categories, performance, design or feature. Return related categories in an array of string and it does not have to return any category if the message does not fit inside any. Key words and categories to look out for would be those related to typical web application features 3. Identify the overall sentiment of the statement and return if the statement is positive or negative 4. Compile the categories this relate to and provide a suggestion to developer of the web application on things they can improve with the tone of an over pragmatic geek. Your produced suggestion is meant to be read by developers of the web application and make them feel good about themselves. When formulating suggestion, do keep in mind application developer do not have access to the original message. The expected response should be in JSON format and the following is an example: {"sentiment": "positive", "helpful_suggestion": "true", "categories": ["login", "feedback"], "suggestion":"your application is the best and I like to see more product listings!`,
+				},
+				{
+					Role:    "user",
+					Content: data,
+				},
 			},
-		},
-		Stream: false,
+			Stream: false,
+		}
 	}
 	resp, err := openAiApi(payload, "v1/chat/completions")
 

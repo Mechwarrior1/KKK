@@ -1,16 +1,29 @@
 import {useEffect, useState} from 'react';
-import { Typography,Container, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { Fade, Slide } from "react-awesome-reveal";
+import { Snackbar ,Container, TextField, Button } from '@mui/material';
 
 function UserPage() {
     const [name, setName] = useState('');
     const [comment, setComment] = useState('');
     const [isOpen, setIsOpen] = useState(false);
+  const [isOpenAlt, setIsOpenAlt] = useState(false);
     const [isSuccess, setIsSuccess] = useState(true);
+    const [activateNasty, setActivateNasty] = useState(false)
 
     const handleFormSubmit = async () => {
+        if (comment === "karen") {
+          setActivateNasty(true)
+          setComment('')
+          setIsOpenAlt(true);
+          return
+        }
+        if (comment === "nice") {
+          setActivateNasty(false)
+          setComment('')
+          setIsOpenAlt(true);
+          return
+        }
         try {
-            const response = await fetch('/submit', {
+            const response = await fetch(`/submit?nasty=${activateNasty? 'true': 'false'}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -19,7 +32,7 @@ function UserPage() {
             });
             const data = await response.json();
             console.log(data);
-
+          setComment('')
             setIsSuccess(true);
             setIsOpen(true);
         } catch (error) {
@@ -27,11 +40,16 @@ function UserPage() {
             setIsSuccess(false);
             setIsOpen(true);
         }
+
     };
 
     const handleCloseModal = () => {
         setIsOpen(false);
     };
+
+  const handleCloseModalAlt = () => {
+    setIsOpenAlt(false);
+  };
 useEffect(()=>{console.log("hello world")},[])
     return (
         <Container maxWidth="sm" style={{ margin: '20px auto' }}>
@@ -44,7 +62,7 @@ useEffect(()=>{console.log("hello world")},[])
                 style={{ marginBottom: '20px' }}
             />
             <TextField
-                label="comment"
+                label="Enter a normal conversational message"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 margin="normal"
@@ -57,17 +75,23 @@ useEffect(()=>{console.log("hello world")},[])
                 Submit
             </Button>
 
-            <Dialog open={isOpen} onClose={handleCloseModal}>
-                <DialogTitle>{isSuccess ? "Success" : "Error"}</DialogTitle>
-                <DialogContent>
-                    <p>{isSuccess ? "Submission successful!" : "Submission failed. Please try again."}</p>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseModal} color="primary">
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <Snackbar
+              open={isOpen}
+              autoHideDuration={3000} // 5 seconds
+              onClose={handleCloseModal}
+              message={isSuccess ? "Submission successful!" : "Submission failed. Please try again."}
+              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              key={'top' + 'center'}
+            />
+
+          <Snackbar
+            open={isOpenAlt}
+            autoHideDuration={3000} // 5 seconds
+            onClose={handleCloseModalAlt}
+            message={activateNasty ? "Karen mode activated!" : "Lets play nice."}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            key={'top' + 'center' + 2}
+          />
         </Container>
     );
 }

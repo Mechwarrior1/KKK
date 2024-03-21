@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip } from '@mui/material';
 import {ClimbingBoxLoader} from "react-spinners"
 
 const SummaryTable = ({ alerts, highlights, isLoading }) => {
@@ -7,16 +7,6 @@ const SummaryTable = ({ alerts, highlights, isLoading }) => {
   const [showHighlightsTable, setShowHighlightsTable] = useState(false);
   const [prevAlertsLength, setPrevAlertsLength] = useState(0);
   const [prevHighlightsLength, setPrevHighlightsLength] = useState(0);
-
-  useEffect(() => {
-    // Simulating a delay for fetching data
-    const delay = setTimeout(() => {
-      setShowAlertsTable(true);
-      setShowHighlightsTable(true);
-    }, 1000);
-
-    return () => clearTimeout(delay);
-  }, []);
 
   useEffect(() => {
     if (alerts.length !== prevAlertsLength) {
@@ -44,39 +34,64 @@ const SummaryTable = ({ alerts, highlights, isLoading }) => {
         </div>
       ) : (
         <div>
-          {showAlertsTable && (
+          {showAlertsTable && alerts.length > 0 && (
             <TableContainer component={Paper} style={{ opacity: showAlertsTable ? 1 : 0, transition: 'opacity 0.5s ease', marginTop: '20px' }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Alerts</TableCell>
+                    <TableCell>Component</TableCell>
+                    <TableCell>Alert</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {alerts.map((alert, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{alert.message}</TableCell>
-                    </TableRow>
-                  ))}
+                  {alerts.map((alert, index) => {
+                    if(alert){
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>
+                            <Chip label={alert.category.toUpperCase()} color="error" style={{marginRight: "10px"}}/>
+                          </TableCell>
+                          <TableCell>
+                          {alert.count} users have recently had issues with application {alert.category}, please investigate immediately.
+                          </TableCell>
+                        </TableRow>
+                      )
+                    }
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
           )}
 
-          {showHighlightsTable && (
+          {showHighlightsTable && highlights.length > 0 && (
             <TableContainer component={Paper} style={{ opacity: showHighlightsTable ? 1 : 0, transition: 'opacity 0.5s ease', marginTop: '20px' }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Highlights</TableCell>
+                    <TableCell>Users are looking forward towards</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {highlights.map((highlight, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{highlight.message}</TableCell>
-                    </TableRow>
-                  ))}
+                  {highlights.map((highlight, index) => {
+                    if (highlight && highlight.FeedbackResponse && highlight.FeedbackResponse.suggestion && highlight.FeedbackResponse.categories) {
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>
+                            <div style={{display: "flex", alignItems: "center"}}>
+                            Username: {highlight.name.toUpperCase()}
+                              {
+                                highlight.FeedbackResponse.categories.map((category, index) => (
+                                  <Chip label={category.toUpperCase()} color="primary" style={{marginLeft: "10px"}} key={index}/>
+                                ))
+                              }
+                            </div>
+                            <br />
+                            {highlight.FeedbackResponse.suggestion}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    }
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
