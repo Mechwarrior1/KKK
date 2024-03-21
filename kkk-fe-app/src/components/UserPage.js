@@ -33,22 +33,26 @@ function UserPage() {
     };
 useEffect(()=>{console.log("hello world")},[])
     return (
-        <Container>
+        <Container maxWidth="sm" style={{ margin: '20px auto' }}>
+            <img src={'./womanyellingcat.jpg'} style={{ marginBottom: '20px', display: 'block' }} /> {/* Image with margins */}
+
             <TextField
                 label="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 fullWidth
                 margin="normal"
+                style={{ marginBottom: '20px' }}
             />
             <TextField
-                type="text"
+                label="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 margin="normal"
                 multiline
                 rows={5}
                 fullWidth
+                style={{ marginBottom: '20px' }}
             />
             <Button variant="contained" color="primary" onClick={handleFormSubmit}>
                 Submit
