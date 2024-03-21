@@ -10,7 +10,7 @@ function UserPage() {
 
     const handleFormSubmit = async () => {
         try {
-            const response = await fetch('https://kkk-api.com', {
+            const response = await fetch('/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

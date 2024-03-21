@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -78,11 +78,12 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Send the response to OpenAI API and get a response
 	openAIResponse, err := sendToOpenAiMsg(requestData.Comment)
+	fmt.Println("openAIResponse", openAIResponse, err)
 	msg := ""
 	if len(openAIResponse.Choices) > 0 {
 		msg = openAIResponse.Choices[0].Message.Content
 	}
-	fmt.Println("openAIResponse", msg, err)
+	fmt.Println("openAIResponse msg", msg, err)
 	if err != nil {
 		http.Error(w, "Error sending data to OpenAI", http.StatusInternalServerError)
 		return
@@ -162,7 +163,8 @@ func sendToOpenAiMsg(data string) (OpenAiChatCompletions, error) {
 	defer resp.Body.Close()
 
 	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	fmt.Println("body", body)
 	if err != nil {
 		return OpenAiChatCompletions{}, err
 	}
