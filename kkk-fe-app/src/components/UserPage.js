@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Container, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 function UserPage() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [comment, setComment] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const [isSuccess, setIsSuccess] = useState(true);
 
@@ -14,7 +14,7 @@ function UserPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email }),
+                body: JSON.stringify({ name, comment }),
             });
             const data = await response.json();
             console.log(data);
@@ -31,22 +31,24 @@ function UserPage() {
     const handleCloseModal = () => {
         setIsOpen(false);
     };
-
+useEffect(()=>{console.log("hello world")},[])
     return (
         <Container>
             <TextField
-                label="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                label="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 fullWidth
                 margin="normal"
             />
             <TextField
-                label="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
+                type="text"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
                 margin="normal"
+                multiline
+                rows={5}
+                fullWidth
             />
             <Button variant="contained" color="primary" onClick={handleFormSubmit}>
                 Submit
