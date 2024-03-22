@@ -63,17 +63,18 @@ const SummaryTable = ({ alerts, highlights, isLoading }) => {
             </TableContainer>
           )}
 
-          {showHighlightsTable && highlights.length > 0 && (
-            <TableContainer component={Paper} style={{ opacity: showHighlightsTable ? 1 : 0, transition: 'opacity 0.5s ease', marginTop: '20px' }}>
+
+            <TableContainer component={Paper} style={{ opacity: true ? 1 : 0, transition: 'opacity 0.5s ease', marginTop: '20px' }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Users are looking forward towards</TableCell>
+                    <TableCell>Users want this to be added</TableCell>
                   </TableRow>
                 </TableHead>
+                {showHighlightsTable && highlights.length > 0 && (
                 <TableBody>
                   {highlights.map((highlight, index) => {
-                    if (highlight && highlight.FeedbackResponse && highlight.FeedbackResponse.suggestion && highlight.FeedbackResponse.categories) {
+                    if (highlight && highlight.FeedbackResponse && highlight.FeedbackResponse.suggestion && highlight.FeedbackResponse.categories.length > 0) {
                       return (
                         <TableRow key={index}>
                           <TableCell>
@@ -93,9 +94,9 @@ const SummaryTable = ({ alerts, highlights, isLoading }) => {
                     }
                   })}
                 </TableBody>
+                )}
               </Table>
             </TableContainer>
-          )}
         </div>
       )}
     </div>

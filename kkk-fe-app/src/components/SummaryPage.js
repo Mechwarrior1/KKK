@@ -11,7 +11,7 @@ const mockAlerts = [
   {category: "login", message: "production issue and your not going home son, people are complaining about unable to login", volume:"high"}
 ]
 
-const alertThreshold = 3
+const alertThreshold = 1
 
 function UserPage() {
   const [highlights, setHightlights] = useState([]);
@@ -23,6 +23,7 @@ function UserPage() {
     let response = []
     if (alerts.length > 0) {
       const countOfPerformance = alerts.reduce((acc, obj) => {
+        if (obj.FeedbackResponse.categories == null || obj.FeedbackResponse.categories.length == 0) {return acc;}
         obj.FeedbackResponse.categories.forEach(category => {
           if (category.toLowerCase() === "performance") {
             acc++;
@@ -31,9 +32,10 @@ function UserPage() {
         return acc;
       }, 0);
       if (countOfPerformance > alertThreshold) {
-        response = [...response, {category: "performance", count: countOfPerformance}]
+        response = [{category: "performance", count: countOfPerformance}, ...response]
       }
       const countOfDesign = alerts.reduce((acc, obj) => {
+        if (obj.FeedbackResponse.categories == null || obj.FeedbackResponse.categories.length == 0) {return acc;}
         obj.FeedbackResponse.categories.forEach(category => {
           console.log("cat",category)
           if (category.toLowerCase() === "design") {
@@ -45,9 +47,10 @@ function UserPage() {
       }, 0);
       console.log("count of design", countOfDesign)
       if (countOfDesign > alertThreshold) {
-        response = [...response, {category: "design", count: countOfDesign}]
+        response = [{category: "design", count: countOfDesign}, ...response]
       }
       const countOfFeature = alerts.reduce((acc, obj) => {
+        if (obj.FeedbackResponse.categories == null || obj.FeedbackResponse.categories.length == 0) {return acc;}
         obj.FeedbackResponse.categories.forEach(category => {
           if (category.toLowerCase() === "feature") {
             acc++;
@@ -56,7 +59,7 @@ function UserPage() {
         return acc;
       }, 0);
       if (countOfFeature > alertThreshold) {
-        response = [...response, {category: "design", count: countOfFeature}]
+        response = [{category: "design", count: countOfFeature}, ...response]
       }
     }
     console.log('response',response)
@@ -69,8 +72,9 @@ function UserPage() {
       try {
         const highlightsResponse = await fetch('/get-suggestion?suggestion=true');
         const newHighlights = await highlightsResponse.json();
+        const response = newHighlights.reverse();
         console.log("highlights",newHighlights)
-        setHightlights(newHighlights);
+        setHightlights(response);
       } catch (error) {
         console.error('Error fetching highlights data:', error);
       }
@@ -82,7 +86,7 @@ function UserPage() {
         const newAlerts = await alertsResponse.json();
         console.log("alerts", newAlerts)
         setAlerts(newAlerts);
-        await new Promise(resolve => setTimeout(resolve, 15000));
+        await new Promise(resolve => setTimeout(resolve, 8000));
       } catch (error) {
         console.error('Error fetching alerts data:', error);
       }
@@ -94,7 +98,7 @@ function UserPage() {
         await fetchAlertsData();
         setIsLoading(false)
         // Wait for a specific interval before making the next request
-        await new Promise(resolve => setTimeout(resolve, 15000)); // 5 seconds interval
+        await new Promise(resolve => setTimeout(resolve, 8000)); // 5 seconds interval
       }
     };
 
